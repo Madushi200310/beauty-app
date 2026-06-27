@@ -21,9 +21,10 @@ export default function Layout() {
   return (
     <Tabs screenOptions={{
       tabBarActiveTintColor: '#FF69B4',
-      tabBarStyle: { backgroundColor: '#fff' },
-      headerStyle: { backgroundColor: '#FF69B4' },
-      headerTintColor: '#fff',
+      tabBarStyle: { backgroundColor: '#1A0A12', borderTopColor: '#3D1830' },
+      tabBarInactiveTintColor: '#A08090',
+      headerStyle: { backgroundColor: '#1A0A12', borderBottomColor: '#3D1830' },
+      headerTintColor: '#FFF0F5',
     }}>
       <Tabs.Screen
         name="index"
@@ -51,6 +52,12 @@ export default function Layout() {
         options={{
           title: 'Login',
           tabBarIcon: ({ color }) => <Ionicons name="person" size={24} color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="explore"
+        options={{
+          href: null,
         }}
       />
     </Tabs>
