@@ -607,16 +607,15 @@ export default function SkinToneScreen() {
               ))}
             </View>
             <Slider
-              style={styles.slider}
-              minimumValue={0}
-              maximumValue={100}
-              value={sliderValue}
-              onValueChange={(v) => setSliderValue(Math.round(v))}
-              minimumTrackTintColor="transparent"
-              maximumTrackTintColor="transparent"
-              thumbTintColor="#C8507A"
-              thumbStyle={styles.thumbStyle}
-            />
+                style={styles.slider}
+                minimumValue={0}
+                maximumValue={100}
+                value={sliderValue}
+                onValueChange={(v) => setSliderValue(Math.round(v))}
+                minimumTrackTintColor="transparent"
+                maximumTrackTintColor="transparent"
+                thumbTintColor="#C8507A"
+              />
           </View>
         </View>
 
