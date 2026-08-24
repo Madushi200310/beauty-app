@@ -68,9 +68,10 @@ export default function HomeScreen() {
               <Text style={styles.cardArrow}>→</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={[styles.card, styles.cardTeal]} onPress={() => router.push('/skinTone')}>
+            {/* ✅ FIXED: Navigate to Face Shape page */}
+            <TouchableOpacity style={[styles.card, styles.cardTeal]} onPress={() => router.push('/faceShape')}>
               <Text style={styles.cardEmoji}>👓</Text>
-              <Text style={styles.cardTitle}>Spectacles{'\n'}Shape</Text>
+              <Text style={styles.cardTitle}>Face{'\n'}Shape</Text>
               <Text style={styles.cardDesc}>Find the best frame shape for your face.</Text>
               <Text style={styles.cardArrow}>→</Text>
             </TouchableOpacity>
