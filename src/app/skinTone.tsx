@@ -1,11 +1,10 @@
 import Slider from '@react-native-community/slider';
+import { useRouter } from 'expo-router';
 import { onAuthStateChanged } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { useEffect, useState } from 'react';
-import { Dimensions, Image, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { auth, db } from '../firebase';
-
-const { width } = Dimensions.get('window');
 
 // ============================================
 // HELPER FUNCTIONS
@@ -27,7 +26,8 @@ const getSkinToneInfo = (value: number) => {
   return { name: 'Espresso', color: '#6B3A2A', undertone: 'Cool' };
 };
 
-const getRecommendations = (value: number) => {
+// Export this so other pages can use it
+export const getRecommendations = (value: number) => {
   if (value < 30) return {
     clothes: {
       image: 'https://images.unsplash.com/photo-1434389677669-e08b4cac3105?w=400&q=80',
@@ -455,74 +455,52 @@ const lightColors = [
 ];
 
 // ============================================
-// ELEGANT COLOR PALETTE COMPONENT
-// ============================================
-
-const ColorPalette = ({ colors }: { colors: { name: string; color: string }[] }) => {
-  // Show only first 8 colors for cleaner look, with "+X more" badge
-  const displayColors = colors.slice(0, 8);
-  const remaining = colors.length - 8;
-
-  return (
-    <View style={styles.paletteContainer}>
-      {displayColors.map((item, i) => (
-        <View key={i} style={styles.paletteItem}>
-          <View style={[
-            styles.paletteSwatch,
-            { backgroundColor: item.color },
-            lightColors.includes(item.color) && { borderWidth: 1, borderColor: 'rgba(255,255,255,0.2)' },
-          ]} />
-          <Text style={styles.paletteName} numberOfLines={1}>{item.name}</Text>
-        </View>
-      ))}
-      {remaining > 0 && (
-        <View style={styles.paletteMore}>
-          <Text style={styles.paletteMoreText}>+{remaining}</Text>
-        </View>
-      )}
-    </View>
-  );
-};
-
-// ============================================
-// ELEGANT CATEGORY CARD
+// CATEGORY CARD COMPONENT
 // ============================================
 
 const CategoryCard = ({
   emoji,
   title,
   image,
-  colors,
+  route,
+  colorsCount,
 }: {
   emoji: string;
   title: string;
   image: string;
-  colors: { name: string; color: string }[];
-}) => (
-  <View style={styles.card}>
-    <Image source={{ uri: image }} style={styles.cardImage} resizeMode="cover" />
-    <View style={styles.cardOverlay}>
-      <View style={styles.cardHeader}>
-        <Text style={styles.cardEmoji}>{emoji}</Text>
-        <View style={styles.cardTitleContainer}>
-          <Text style={styles.cardTitle}>{title}</Text>
-          <Text style={styles.cardCount}>{colors.length} shades</Text>
+  route: string;
+  colorsCount: number;
+}) => {
+  const router = useRouter();
+
+  return (
+    <TouchableOpacity 
+      style={styles.categoryCard}
+      onPress={() => router.push(route as any)} // ✅ Fix: Type assertion
+      activeOpacity={0.7}>
+      <Image source={{ uri: image }} style={styles.categoryImage} resizeMode="cover" />
+      <View style={styles.categoryOverlay}>
+        <View style={styles.categoryContent}>
+          <Text style={styles.categoryEmoji}>{emoji}</Text>
+          <Text style={styles.categoryTitle}>{title}</Text>
+          <Text style={styles.categoryCount}>{colorsCount} shades</Text>
+          <View style={styles.categoryArrow}>
+            <Text style={styles.categoryArrowText}>→</Text>
+          </View>
         </View>
       </View>
-      <ColorPalette colors={colors} />
-    </View>
-  </View>
-);
+    </TouchableOpacity>
+  );
+};
 
 // ============================================
-// MAIN SCREEN COMPONENT
+// MAIN SKIN TONE SCREEN
 // ============================================
 
 export default function SkinToneScreen() {
   const [sliderValue, setSliderValue] = useState(20);
   const [gender, setGender] = useState<string | null>(null);
   const skinInfo = getSkinToneInfo(sliderValue);
-  const rec = getRecommendations(sliderValue);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -542,25 +520,68 @@ export default function SkinToneScreen() {
 
   const getCategories = () => {
     const categories = [
-      { id: 'clothes', emoji: '👗', title: 'Clothing', data: rec.clothes },
-      { id: 'foundation', emoji: '🧴', title: 'Foundation', data: rec.foundation },
-      { id: 'eyeshadow', emoji: '✨', title: 'Eyeshadow', data: rec.eyeshadow },
+      { 
+        id: 'clothing', 
+        emoji: '👗', 
+        title: 'Clothing', 
+        route: '/clothing',
+        image: 'https://images.unsplash.com/photo-1434389677669-e08b4cac3105?w=400&q=80',
+        colorsCount: 12
+      },
+      { 
+        id: 'foundation', 
+        emoji: '🧴', 
+        title: 'Foundation', 
+        route: '/foundation',
+        image: 'https://images.unsplash.com/photo-1631729371254-42c2892f0e6e?w=400&q=80',
+        colorsCount: 12
+      },
+      { 
+        id: 'eyeshadow', 
+        emoji: '✨', 
+        title: 'Eyeshadow', 
+        route: '/eyeshadow',
+        image: 'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=400&q=80',
+        colorsCount: 12
+      },
     ];
 
     if (gender !== 'male') {
       categories.push(
-        { id: 'lipstick', emoji: '💄', title: 'Lipstick', data: rec.lipstick },
-        { id: 'nailPolish', emoji: '💅', title: 'Nail Polish', data: rec.nailPolish }
+        { 
+          id: 'lipstick', 
+          emoji: '💄', 
+          title: 'Lipstick', 
+          route: '/lipstick',
+          image: 'https://images.unsplash.com/photo-1512207736890-6ffed8a84e8d?w=400&q=80',
+          colorsCount: 12
+        },
+        { 
+          id: 'nailPolish', 
+          emoji: '💅', 
+          title: 'Nail Polish', 
+          route: '/nailPolish',
+          image: 'https://images.unsplash.com/photo-1604654894610-df63bc536371?w=400&q=80',
+          colorsCount: 12
+        }
       );
     }
 
-    categories.push({ id: 'contactLens', emoji: '👁', title: 'Contact Lens', data: rec.contactLens });
+    categories.push({ 
+      id: 'contactLens', 
+      emoji: '👁', 
+      title: 'Contact Lens', 
+      route: '/contactLens',
+      image: 'https://images.unsplash.com/photo-1574258495973-f010dfbb5371?w=400&q=80',
+      colorsCount: 12
+    });
+
     return categories;
   };
 
   const categories = getCategories();
 
-  // Split into rows of 2 for better visual balance
+  // Split into rows of 2
   const rows = [];
   for (let i = 0; i < categories.length; i += 2) {
     rows.push(categories.slice(i, i + 2));
@@ -578,17 +599,10 @@ export default function SkinToneScreen() {
         <View style={styles.headerSection}>
           <Text style={styles.pageTag}>BEAUTY MATCH</Text>
           <Text style={styles.pageTitle}>Skin Tone Finder</Text>
-          <Text style={styles.pageSubtitle}>Discover your perfect palette</Text>
+          <Text style={styles.pageSubtitle}>Select your skin tone to get personalized recommendations</Text>
         </View>
 
-        {/* Gender Badge */}
-        {gender === 'male' && (
-          <View style={styles.genderBadge}>
-            <Text style={styles.genderBadgeText}>👨 Male profile — lipstick & nail polish hidden</Text>
-          </View>
-        )}
-
-        {/* Skin Tone Selector - Minimal & Elegant */}
+        {/* Skin Tone Selector */}
         <View style={styles.selectorCard}>
           <View style={styles.toneRow}>
             <View style={[styles.toneCircle, { backgroundColor: skinInfo.color }]} />
@@ -607,28 +621,29 @@ export default function SkinToneScreen() {
               ))}
             </View>
             <Slider
-                style={styles.slider}
-                minimumValue={0}
-                maximumValue={100}
-                value={sliderValue}
-                onValueChange={(v) => setSliderValue(Math.round(v))}
-                minimumTrackTintColor="transparent"
-                maximumTrackTintColor="transparent"
-                thumbTintColor="#C8507A"
-              />
+              style={styles.slider}
+              minimumValue={0}
+              maximumValue={100}
+              value={sliderValue}
+              onValueChange={(v) => setSliderValue(Math.round(v))}
+              minimumTrackTintColor="transparent"
+              maximumTrackTintColor="transparent"
+              thumbTintColor="#C8507A"
+              // ✅ Removed thumbStyle - not supported by @react-native-community/slider
+            />
           </View>
         </View>
 
-        {/* Elegant Divider */}
+        {/* Divider */}
         <View style={styles.dividerContainer}>
           <View style={styles.dividerLine} />
           <View style={styles.dividerDot} />
-          <Text style={styles.dividerText}>Your Palette</Text>
+          <Text style={styles.dividerText}>Choose a category</Text>
           <View style={styles.dividerDot} />
           <View style={styles.dividerLine} />
         </View>
 
-        {/* 2 CARDS PER ROW - Clean & Elegant */}
+        {/* Category Cards - 2 per row */}
         {rows.map((row, rowIndex) => (
           <View key={rowIndex} style={styles.gridRow}>
             {row.map((category) => (
@@ -636,8 +651,9 @@ export default function SkinToneScreen() {
                 <CategoryCard 
                   emoji={category.emoji}
                   title={category.title}
-                  image={category.data.image}
-                  colors={category.data.colors}
+                  image={category.image}
+                  route={category.route}
+                  colorsCount={category.colorsCount}
                 />
               </View>
             ))}
@@ -653,19 +669,25 @@ export default function SkinToneScreen() {
 }
 
 // ============================================
-// ELEGANT STYLES
+// STYLES
 // ============================================
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0A0A0A' },
-  content: { padding: 16, paddingBottom: 48 },
+  container: { 
+    flex: 1, 
+    backgroundColor: '#1A0A12',
+  },
+  content: { 
+    padding: 16, 
+    paddingBottom: 48 
+  },
 
   pageBorder: {
     borderWidth: 1,
-    borderColor: 'rgba(200, 80, 122, 0.3)',
+    borderColor: '#C8507A',
     borderRadius: 24,
-    padding: 20,
-    backgroundColor: '#0A0A0A',
+    padding: 16,
+    backgroundColor: '#1A0A12',
   },
 
   headerSection: {
@@ -674,80 +696,68 @@ const styles = StyleSheet.create({
   pageTag: { 
     fontSize: 10, 
     fontWeight: '700', 
-    letterSpacing: 4, 
+    letterSpacing: 3, 
     color: '#C8507A', 
     marginBottom: 6,
-    textTransform: 'uppercase',
   },
   pageTitle: { 
-    fontSize: 28, 
+    fontSize: 26, 
     fontWeight: '800', 
-    color: '#FFFFFF', 
+    color: '#FFF0F5', 
     marginBottom: 4,
     letterSpacing: -0.5,
   },
   pageSubtitle: {
-    fontSize: 13,
-    color: 'rgba(255,255,255,0.5)',
+    fontSize: 12,
+    color: '#A08090',
     fontWeight: '400',
   },
 
-  genderBadge: {
-    backgroundColor: 'rgba(200, 80, 122, 0.1)',
-    borderRadius: 12,
-    padding: 12,
-    marginBottom: 16,
-    borderWidth: 1,
-    borderColor: 'rgba(200, 80, 122, 0.2)',
-  },
-  genderBadgeText: { fontSize: 12, color: 'rgba(255,255,255,0.6)' },
-
-  // Elegant Selector
   selectorCard: {
-    backgroundColor: 'rgba(255,255,255,0.05)',
+    backgroundColor: '#2A1020',
     borderRadius: 20,
-    padding: 20,
-    marginBottom: 24,
+    padding: 16,
+    marginBottom: 20,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.08)',
+    borderColor: '#3D1830',
   },
   toneRow: { 
     flexDirection: 'row', 
     alignItems: 'center', 
-    marginBottom: 16,
+    marginBottom: 14,
   },
   toneCircle: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
+    width: 52,
+    height: 52,
+    borderRadius: 26,
     borderWidth: 2,
     borderColor: '#C8507A',
     shadowColor: '#C8507A',
-    shadowOffset: { width: 0, height: 6 },
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
-    shadowRadius: 12,
-    elevation: 8,
+    shadowRadius: 8,
+    elevation: 6,
   },
   toneInfo: { 
-    marginLeft: 16,
+    marginLeft: 14,
     flex: 1,
   },
   toneName: { 
-    fontSize: 20, 
+    fontSize: 18, 
     fontWeight: '700', 
-    color: '#FFFFFF',
+    color: '#FFF0F5',
     marginBottom: 2,
   },
   toneUndertone: {
-    fontSize: 12,
-    color: 'rgba(255,255,255,0.4)',
+    fontSize: 11,
+    color: '#A08090',
     fontWeight: '400',
   },
   toneValue: {
     backgroundColor: 'rgba(200, 80, 122, 0.15)',
     paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 20,
+    paddingVertical: 4,
+    borderRadius: 16,
     borderWidth: 1,
     borderColor: 'rgba(200, 80, 122, 0.2)',
   },
@@ -762,40 +772,28 @@ const styles = StyleSheet.create({
   },
   gradientBar: { 
     flexDirection: 'row', 
-    height: 20, 
-    borderRadius: 12, 
+    height: 16, 
+    borderRadius: 8, 
     overflow: 'hidden',
-    backgroundColor: 'rgba(255,255,255,0.05)',
+    backgroundColor: '#1A0A12',
   },
   gradientSlice: { flex: 1 },
   slider: { 
     width: '100%', 
-    height: 40, 
-    marginTop: -12,
-  },
-  thumbStyle: {
-    width: 24,
-    height: 24,
-    backgroundColor: '#C8507A',
-    borderRadius: 12,
-    shadowColor: '#C8507A',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.4,
-    shadowRadius: 8,
-    elevation: 6,
+    height: 36, 
+    marginTop: -10,
   },
 
-  // Elegant Divider
   dividerContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: 16,
     gap: 10,
   },
   dividerLine: {
     flex: 1,
     height: 1,
-    backgroundColor: 'rgba(255,255,255,0.08)',
+    backgroundColor: '#3D1830',
   },
   dividerDot: {
     width: 4,
@@ -804,18 +802,17 @@ const styles = StyleSheet.create({
     backgroundColor: '#C8507A',
   },
   dividerText: {
-    fontSize: 11,
-    fontWeight: '600',
+    fontSize: 10,
+    fontWeight: '700',
     letterSpacing: 2,
-    color: 'rgba(255,255,255,0.4)',
+    color: '#C8507A',
     textTransform: 'uppercase',
   },
 
-  // 2 Cards Per Row - Clean Layout
   gridRow: { 
     flexDirection: 'row', 
-    gap: 12,
-    marginBottom: 12,
+    gap: 10,
+    marginBottom: 10,
   },
   col: { 
     flex: 1,
@@ -824,87 +821,58 @@ const styles = StyleSheet.create({
     opacity: 0,
   },
 
-  // Elegant Card
-  card: {
-    backgroundColor: 'rgba(255,255,255,0.03)',
+  categoryCard: {
+    backgroundColor: '#2A1020',
     borderRadius: 16,
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.06)',
+    borderColor: '#3D1830',
+    height: 140,
   },
-  cardImage: { 
+  categoryImage: { 
     width: '100%', 
-    height: 120,
-    opacity: 0.8,
+    height: '100%',
+    opacity: 0.6,
   },
-  cardOverlay: {
+  categoryOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(26, 10, 18, 0.7)',
     padding: 14,
-    backgroundColor: 'rgba(10,10,10,0.95)',
+    justifyContent: 'center',
   },
-  cardHeader: {
-    flexDirection: 'row',
+  categoryContent: {
     alignItems: 'center',
-    marginBottom: 12,
   },
-  cardEmoji: {
-    fontSize: 18,
-    marginRight: 10,
+  categoryEmoji: {
+    fontSize: 28,
+    marginBottom: 6,
   },
-  cardTitleContainer: {
-    flex: 1,
+  categoryTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#FFF0F5',
+    marginBottom: 2,
   },
-  cardTitle: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#FFFFFF',
+  categoryCount: {
+    fontSize: 11,
+    color: '#A08090',
+    marginBottom: 8,
   },
-  cardCount: {
-    fontSize: 10,
-    color: 'rgba(255,255,255,0.3)',
-    fontWeight: '400',
-  },
-
-  // Minimal Color Palette
-  paletteContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-  },
-  paletteItem: {
-    alignItems: 'center',
-    width: (width - 100) / 6, // Responsive sizing
-  },
-  paletteSwatch: {
-    width: 36,
-    height: 36,
-    borderRadius: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  paletteName: {
-    fontSize: 8,
-    color: 'rgba(255,255,255,0.3)',
-    marginTop: 3,
-    textAlign: 'center',
-    maxWidth: 36,
-  },
-  paletteMore: {
-    width: 36,
-    height: 36,
-    borderRadius: 8,
-    backgroundColor: 'rgba(200, 80, 122, 0.1)',
-    borderWidth: 1,
-    borderColor: 'rgba(200, 80, 122, 0.2)',
-    borderStyle: 'dashed',
+  categoryArrow: {
+    backgroundColor: '#C8507A',
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  paletteMoreText: {
-    fontSize: 10,
-    fontWeight: '600',
-    color: '#C8507A',
+  categoryArrowText: {
+    fontSize: 16,
+    color: '#FFF0F5',
+    fontWeight: '700',
   },
 });
