@@ -1,16 +1,16 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Tabs, useRouter } from 'expo-router';
-import { onAuthStateChanged, User } from 'firebase/auth'; // ✅ Import User from firebase/auth
+import { onAuthStateChanged, User } from 'firebase/auth';
 import { useEffect, useState } from 'react';
 import { auth } from '../firebase';
 
 export default function Layout() {
-  const [user, setUser] = useState<User | null>(null); // ✅ Explicitly type as User | null
+  const [user, setUser] = useState<User | null>(null);
   const router = useRouter();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser); // ✅ Now TypeScript knows this is User | null
+      setUser(currentUser);
       if (!currentUser) {
         router.replace('/login');
       }
@@ -39,7 +39,7 @@ export default function Layout() {
         },
       }}
     >
-      {/* Main Tab Screens - Visible in Tab Bar */}
+      {/* Main Tab Screens */}
       <Tabs.Screen
         name="index"
         options={{
@@ -76,7 +76,7 @@ export default function Layout() {
         }}
       />
 
-      {/* Hidden Screens - Not visible in Tab Bar (Accessed via navigation) */}
+      {/* Hidden Screens */}
       <Tabs.Screen
         name="clothing"
         options={{
@@ -119,6 +119,23 @@ export default function Layout() {
       
       <Tabs.Screen
         name="contactLens"
+        options={{
+          href: null,
+          headerShown: false,
+        }}
+      />
+      
+      <Tabs.Screen
+        name="faceShape"
+        options={{
+          href: null,
+          headerShown: false,
+        }}
+      />
+      
+      {/* ✅ NEW: Face Shape Detail Page */}
+      <Tabs.Screen
+        name="faceShapeDetail"
         options={{
           href: null,
           headerShown: false,
