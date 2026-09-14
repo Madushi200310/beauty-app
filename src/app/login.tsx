@@ -1,3 +1,4 @@
+// app/login.tsx
 import { useRouter } from 'expo-router';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
@@ -5,6 +6,7 @@ import { useState } from 'react';
 import {
   Alert,
   Dimensions,
+  Image,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -12,11 +14,12 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  View
+  View,
 } from 'react-native';
 import { auth, db } from '../firebase';
 
-const { width, height } = Dimensions.get('window');
+const { width } = Dimensions.get('window');
+const isWide = width > 768; // split layout on tablet/web
 
 export default function LoginScreen() {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -62,265 +65,445 @@ export default function LoginScreen() {
   return (
     <KeyboardAvoidingView
       style={styles.wrapper}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-      
-      <ScrollView 
-        contentContainerStyle={styles.scrollContainer} 
-        showsVerticalScrollIndicator={false}
-        keyboardShouldPersistTaps="handled">
-        
-        {/* ✅ CENTERED CARD */}
-        <View style={styles.cardContainer}>
-          
-          {/* Decorative gradient line at top */}
-          <View style={styles.cardAccent} />
-          
-          <View style={styles.card}>
-            
-            {/* Header */}
-            <View style={styles.header}>
-              <View style={styles.logoContainer}>
-                <Text style={styles.logoEmoji}>💄</Text>
-              </View>
-              <Text style={styles.title}>Beauty App</Text>
-              <Text style={styles.subtitle}>
-                {isSignUp ? 'Create your account' : 'Welcome back!'}
-              </Text>
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+
+      <View style={[styles.splitContainer, !isWide && styles.splitContainerMobile]}>
+
+        {/* ─────────── LEFT PANEL: Branding / Hero ─────────── */}
+        <View style={[styles.leftPanel, !isWide && styles.leftPanelMobile]}>
+          <Image
+            source={{ uri: 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=1200&q=80' }}
+            style={styles.heroImage}
+            resizeMode="cover"
+          />
+          <View style={styles.heroOverlay} />
+
+          {/* Top Logo */}
+          <View style={styles.brandRow}>
+            <Text style={styles.brandLogo}>BEAUTY</Text>
+            <TouchableOpacity
+              style={styles.backToWebsite}
+              onPress={() => router.push('/')}
+              activeOpacity={0.7}>
+              <Text style={styles.backToWebsiteText}>Back to Home →</Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* Bottom Caption */}
+          <View style={styles.heroCaption}>
+            <Text style={styles.heroCaptionTitle}>
+              Find Colors{'\n'}That Match You
+            </Text>
+            <Text style={styles.heroCaptionSub}>
+              Your personal beauty guide — tailored to your skin tone.
+            </Text>
+
+            {/* Dots indicator */}
+            <View style={styles.dotsRow}>
+              <View style={[styles.dot, styles.dotActive]} />
+              <View style={styles.dot} />
+              <View style={styles.dot} />
             </View>
-
-            {/* Form Fields */}
-            <View style={styles.form}>
-              
-              {/* Sign Up Extra Fields */}
-              {isSignUp && (
-                <>
-                  <View style={styles.inputGroup}>
-                    <Text style={styles.fieldLabel}>Full Name</Text>
-                    <TextInput
-                      style={styles.input}
-                      placeholder="Enter your name"
-                      placeholderTextColor="rgba(255,255,255,0.3)"
-                      value={name}
-                      onChangeText={setName}
-                    />
-                  </View>
-
-                  <View style={styles.inputGroup}>
-                    <Text style={styles.fieldLabel}>Age</Text>
-                    <TextInput
-                      style={styles.input}
-                      placeholder="Enter your age"
-                      placeholderTextColor="rgba(255,255,255,0.3)"
-                      value={age}
-                      onChangeText={setAge}
-                      keyboardType="numeric"
-                      maxLength={3}
-                    />
-                  </View>
-                </>
-              )}
-
-              <View style={styles.inputGroup}>
-                <Text style={styles.fieldLabel}>Email</Text>
-                <TextInput
-                  style={styles.input}
-                  placeholder="Enter your email"
-                  placeholderTextColor="rgba(255,255,255,0.3)"
-                  value={email}
-                  onChangeText={setEmail}
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                />
-              </View>
-
-              <View style={styles.inputGroup}>
-                <Text style={styles.fieldLabel}>Password</Text>
-                <TextInput
-                  style={styles.input}
-                  placeholder="Enter your password"
-                  placeholderTextColor="rgba(255,255,255,0.3)"
-                  value={password}
-                  onChangeText={setPassword}
-                  secureTextEntry
-                />
-              </View>
-
-              {/* Submit Button */}
-              <TouchableOpacity
-                style={[styles.button, loading && styles.buttonDisabled]}
-                onPress={handleAuth}
-                disabled={loading}
-                activeOpacity={0.7}>
-                <Text style={styles.buttonText}>
-                  {loading ? 'Please wait...' : isSignUp ? 'Create Account' : 'Login'}
-                </Text>
-              </TouchableOpacity>
-
-              {/* Switch between Login/Signup */}
-              <TouchableOpacity 
-                onPress={() => {
-                  setIsSignUp(!isSignUp);
-                  setAge('');
-                  setName('');
-                }}
-                style={styles.switchContainer}>
-                <Text style={styles.switchText}>
-                  {isSignUp ? 'Already have an account?' : "Don't have an account?"}
-                </Text>
-                <Text style={styles.switchLink}>
-                  {isSignUp ? ' Login' : ' Sign Up'}
-                </Text>
-              </TouchableOpacity>
-            </View>
-
           </View>
         </View>
-        
-      </ScrollView>
+
+        {/* ─────────── RIGHT PANEL: Form ─────────── */}
+        <ScrollView
+          style={styles.rightPanel}
+          contentContainerStyle={styles.rightPanelContent}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled">
+
+          <Text style={styles.formTitle}>
+            {isSignUp ? 'Create an account' : 'Welcome back'}
+          </Text>
+
+          <View style={styles.formSwitchRow}>
+            <Text style={styles.formSwitchText}>
+              {isSignUp ? 'Already have an account?' : "Don't have an account?"}
+            </Text>
+            <TouchableOpacity
+              onPress={() => {
+                setIsSignUp(!isSignUp);
+                setAge('');
+                setName('');
+              }}>
+              <Text style={styles.formSwitchLink}>
+                {isSignUp ? ' Login' : ' Sign up'}
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* Name + Age side by side (sign up only) */}
+          {isSignUp && (
+            <View style={styles.rowTwo}>
+              <View style={[styles.inputGroup, styles.halfWidth]}>
+                <Text style={styles.fieldLabel}>FIRST NAME</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Enter your name"
+                  placeholderTextColor="rgba(255,255,255,0.25)"
+                  value={name}
+                  onChangeText={setName}
+                />
+              </View>
+
+              <View style={[styles.inputGroup, styles.halfWidth]}>
+                <Text style={styles.fieldLabel}>AGE</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Age"
+                  placeholderTextColor="rgba(255,255,255,0.25)"
+                  value={age}
+                  onChangeText={setAge}
+                  keyboardType="numeric"
+                  maxLength={3}
+                />
+              </View>
+            </View>
+          )}
+
+          {/* Email */}
+          <View style={styles.inputGroup}>
+            <Text style={styles.fieldLabel}>EMAIL</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Enter your email"
+              placeholderTextColor="rgba(255,255,255,0.25)"
+              value={email}
+              onChangeText={setEmail}
+              keyboardType="email-address"
+              autoCapitalize="none"
+            />
+          </View>
+
+          {/* Password */}
+          <View style={styles.inputGroup}>
+            <Text style={styles.fieldLabel}>PASSWORD</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Enter your password"
+              placeholderTextColor="rgba(255,255,255,0.25)"
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry
+            />
+          </View>
+
+          {/* Terms checkbox (sign up only) */}
+          {isSignUp && (
+            <View style={styles.checkRow}>
+              <View style={styles.checkbox} />
+              <Text style={styles.checkText}>
+                I agree to the <Text style={styles.checkLink}>Terms & Conditions</Text>
+              </Text>
+            </View>
+          )}
+
+          {/* Submit */}
+          <TouchableOpacity
+            style={[styles.button, loading && styles.buttonDisabled]}
+            onPress={handleAuth}
+            disabled={loading}
+            activeOpacity={0.8}>
+            <Text style={styles.buttonText}>
+              {loading ? 'Please wait...' : isSignUp ? 'Create account' : 'Login'}
+            </Text>
+          </TouchableOpacity>
+
+          {/* Divider */}
+          <View style={styles.orRow}>
+            <View style={styles.orLine} />
+            <Text style={styles.orText}>OR</Text>
+            <View style={styles.orLine} />
+          </View>
+
+          {/* Social buttons */}
+          <View style={styles.socialRow}>
+            <TouchableOpacity style={styles.socialBtn} activeOpacity={0.7}>
+              <Text style={styles.socialIcon}>G</Text>
+              <Text style={styles.socialText}>Google</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.socialBtn} activeOpacity={0.7}>
+              <Text style={styles.socialIcon}></Text>
+              <Text style={styles.socialText}>Apple</Text>
+            </TouchableOpacity>
+          </View>
+
+        </ScrollView>
+
+      </View>
     </KeyboardAvoidingView>
   );
 }
 
+// ============================================
+// STYLES — same dark rose theme
+// ============================================
+
 const styles = StyleSheet.create({
-  wrapper: { 
-    flex: 1, 
+  wrapper: {
+    flex: 1,
     backgroundColor: '#0A0A0A',
   },
-  
-  scrollContainer: {
-    flexGrow: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
+
+  // Outer split container
+  splitContainer: {
+    flex: 1,
+    flexDirection: 'row',
+  },
+  splitContainerMobile: {
+    flexDirection: 'column',
   },
 
-  // ✅ CENTERED CARD CONTAINER
-  cardContainer: {
+  // ── LEFT PANEL ──
+  leftPanel: {
+    flex: 1,
+    position: 'relative',
+    overflow: 'hidden',
+    backgroundColor: '#1A0A12',
+  },
+  leftPanelMobile: {
+    flex: 0,
+    height: 240,
+  },
+  heroImage: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
     width: '100%',
-    maxWidth: 420,
-    alignSelf: 'center',
+    height: '100%',
+    opacity: 0.55,
   },
-
-  // Decorative accent line
-  cardAccent: {
-    height: 3,
-    width: 60,
-    backgroundColor: '#C8507A',
-    borderRadius: 2,
-    alignSelf: 'center',
-    marginBottom: 20,
+  heroOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(26, 10, 18, 0.55)',
   },
-
-  card: {
-    backgroundColor: 'rgba(255,255,255,0.05)',
-    borderRadius: 24,
-    padding: 28,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.08)',
-    backdropFilter: 'blur(20px)',
-    shadowColor: '#C8507A',
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.1,
-    shadowRadius: 30,
-    elevation: 10,
-  },
-
-  // Header
-  header: {
+  brandRow: {
+    flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 32,
+    justifyContent: 'space-between',
+    padding: 24,
+    zIndex: 2,
   },
-  logoContainer: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    backgroundColor: 'rgba(200, 80, 122, 0.15)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 16,
-    borderWidth: 1,
-    borderColor: 'rgba(200, 80, 122, 0.2)',
-  },
-  logoEmoji: {
-    fontSize: 32,
-  },
-  title: {
-    fontSize: 28,
+  brandLogo: {
+    fontSize: 18,
     fontWeight: '800',
-    color: '#FFFFFF',
-    marginBottom: 6,
+    color: '#FFF0F5',
+    letterSpacing: 4,
+  },
+  backToWebsite: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(255,240,245,0.3)',
+    backgroundColor: 'rgba(255,240,245,0.05)',
+  },
+  backToWebsiteText: {
+    fontSize: 11,
+    color: '#FFF0F5',
+    fontWeight: '600',
+  },
+  heroCaption: {
+    position: 'absolute',
+    bottom: 40,
+    left: 32,
+    right: 32,
+    zIndex: 2,
+  },
+  heroCaptionTitle: {
+    fontSize: 34,
+    fontWeight: '800',
+    color: '#FFF0F5',
+    lineHeight: 42,
     letterSpacing: -0.5,
+    marginBottom: 12,
   },
-  subtitle: {
-    fontSize: 14,
-    color: 'rgba(255,255,255,0.5)',
-    fontWeight: '400',
+  heroCaptionSub: {
+    fontSize: 13,
+    color: 'rgba(255,240,245,0.7)',
+    lineHeight: 20,
+    marginBottom: 24,
   },
-
-  // Form
-  form: {
+  dotsRow: {
+    flexDirection: 'row',
     gap: 6,
   },
+  dot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: 'rgba(255,240,245,0.3)',
+  },
+  dotActive: {
+    backgroundColor: '#C8507A',
+    width: 24,
+  },
+
+  // ── RIGHT PANEL ──
+  rightPanel: {
+    flex: 1,
+    backgroundColor: '#0A0A0A',
+  },
+  rightPanelContent: {
+    flexGrow: 1,
+    justifyContent: 'center',
+    paddingHorizontal: 48,
+    paddingVertical: 40,
+    maxWidth: 520,
+    width: '100%',
+    alignSelf: 'center',
+  },
+  formTitle: {
+    fontSize: 32,
+    fontWeight: '800',
+    color: '#FFFFFF',
+    marginBottom: 8,
+    letterSpacing: -0.5,
+  },
+  formSwitchRow: {
+    flexDirection: 'row',
+    marginBottom: 32,
+  },
+  formSwitchText: {
+    fontSize: 13,
+    color: 'rgba(255,255,255,0.5)',
+  },
+  formSwitchLink: {
+    fontSize: 13,
+    color: '#C8507A',
+    fontWeight: '600',
+  },
+
+  // Form fields
+  rowTwo: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  halfWidth: {
+    flex: 1,
+  },
   inputGroup: {
-    marginBottom: 4,
+    marginBottom: 16,
   },
   fieldLabel: {
-    fontSize: 11,
-    fontWeight: '600',
-    letterSpacing: 1,
-    color: 'rgba(255,255,255,0.4)',
-    marginBottom: 6,
-    textTransform: 'uppercase',
+    fontSize: 10,
+    fontWeight: '700',
+    letterSpacing: 1.5,
+    color: 'rgba(255,255,255,0.35)',
+    marginBottom: 8,
   },
   input: {
-    backgroundColor: 'rgba(255,255,255,0.05)',
+    backgroundColor: 'rgba(255,255,255,0.04)',
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.08)',
-    borderRadius: 12,
-    padding: 14,
-    fontSize: 15,
+    borderRadius: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 14,
+    fontSize: 14,
     color: '#FFFFFF',
-    fontFamily: Platform.OS === 'ios' ? 'System' : 'normal',
+  },
+
+  // Checkbox
+  checkRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 20,
+    gap: 8,
+  },
+  checkbox: {
+    width: 16,
+    height: 16,
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: 'rgba(200, 80, 122, 0.6)',
+    backgroundColor: 'rgba(200, 80, 122, 0.1)',
+  },
+  checkText: {
+    fontSize: 12,
+    color: 'rgba(255,255,255,0.5)',
+  },
+  checkLink: {
+    color: '#C8507A',
+    fontWeight: '600',
   },
 
   // Button
   button: {
     backgroundColor: '#C8507A',
-    borderRadius: 14,
-    padding: 16,
+    borderRadius: 12,
+    paddingVertical: 16,
     alignItems: 'center',
-    marginTop: 12,
-    marginBottom: 8,
+    marginTop: 4,
+    marginBottom: 24,
     shadowColor: '#C8507A',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.3,
-    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.35,
+    shadowRadius: 16,
     elevation: 6,
   },
-  buttonDisabled: { 
-    backgroundColor: 'rgba(200, 80, 122, 0.3)',
+  buttonDisabled: {
+    backgroundColor: 'rgba(200, 80, 122, 0.35)',
   },
-  buttonText: { 
-    color: '#FFFFFF', 
-    fontSize: 16, 
+  buttonText: {
+    color: '#FFFFFF',
+    fontSize: 15,
     fontWeight: '700',
-    letterSpacing: 0.5,
+    letterSpacing: 0.4,
   },
 
-  // Switch
-  switchContainer: {
+  // OR divider
+  orRow: {
     flexDirection: 'row',
-    justifyContent: 'center',
     alignItems: 'center',
-    paddingVertical: 8,
+    marginBottom: 20,
+    gap: 12,
   },
-  switchText: {
-    color: 'rgba(255,255,255,0.4)',
-    fontSize: 13,
+  orLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: 'rgba(255,255,255,0.08)',
   },
-  switchLink: {
-    color: '#C8507A',
+  orText: {
+    fontSize: 10,
+    fontWeight: '700',
+    letterSpacing: 2,
+    color: 'rgba(255,255,255,0.35)',
+  },
+
+  // Social
+  socialRow: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  socialBtn: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    paddingVertical: 12,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.1)',
+    backgroundColor: 'rgba(255,255,255,0.03)',
+  },
+  socialIcon: {
+    fontSize: 16,
+    color: '#FFFFFF',
+    fontWeight: '700',
+  },
+  socialText: {
     fontSize: 13,
+    color: '#FFFFFF',
     fontWeight: '600',
   },
 });

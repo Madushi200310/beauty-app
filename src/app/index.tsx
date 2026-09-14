@@ -1,6 +1,53 @@
 import { useRouter } from 'expo-router';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import {
+  Dimensions,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 
+const { width } = Dimensions.get('window');
+const isWide = width > 900;
+const CONTENT_MAX = 1100;
+
+// ============================================
+// REUSABLE FEATURE CARD
+// ============================================
+type FeatureCardProps = {
+  emoji: string;
+  title: string;
+  desc: string;
+  accent: string;
+  bg: string;
+  onPress: () => void;
+};
+
+function FeatureCard({ emoji, title, desc, accent, bg, onPress }: FeatureCardProps) {
+  return (
+    <TouchableOpacity
+      style={[styles.card, { backgroundColor: bg, borderColor: accent }]}
+      onPress={onPress}
+      activeOpacity={0.85}>
+
+      <View style={[styles.iconRing, { borderColor: accent }]}>
+        <Text style={styles.icon}>{emoji}</Text>
+      </View>
+
+      <Text style={styles.cardTitle}>{title}</Text>
+      <Text style={styles.cardDesc}>{desc}</Text>
+
+      <View style={styles.cardFooter}>
+        <Text style={[styles.cardArrow, { color: accent }]}>→</Text>
+      </View>
+    </TouchableOpacity>
+  );
+}
+
+// ============================================
+// HOME SCREEN
+// ============================================
 export default function HomeScreen() {
   const router = useRouter();
 
@@ -12,75 +59,105 @@ export default function HomeScreen() {
 
       <View style={styles.pageBorder}>
 
-        {/* Hero + Skin Tone Card side by side */}
-        <View style={styles.heroRow}>
+        {/* ─────────── HERO ─────────── */}
+        <View style={styles.hero}>
+          <Text style={styles.heroTag}>YOUR PERSONAL BEAUTY GUIDE</Text>
 
-          {/* Left: Hero Text */}
-          <View style={styles.heroText}>
-            <Text style={styles.heroTag}>YOUR PERSONAL BEAUTY GUIDE</Text>
-            <Text style={styles.heroTitle}>Glow Up{'\n'}Your{'\n'}Style ✨</Text>
-            <Text style={styles.heroSub}>Discover colors that match your skin tone and style perfectly.</Text>
-          </View>
+          <Text style={styles.heroTitle}>
+            Glow Up{'\n'}Your Style ✨
+          </Text>
 
-          {/* Right: Skin Tone Card */}
-          <TouchableOpacity style={styles.skinToneCard} onPress={() => router.push('/skinTone')}>
-            <Text style={styles.skinToneEmoji}>🎨</Text>
-            <Text style={styles.skinToneTitle}>Skin Tone{'\n'}Finder</Text>
-            <Text style={styles.skinToneDesc}>Find your perfect shade and get personalized color picks.</Text>
-            <View style={styles.skinToneBtn}>
-              <Text style={styles.skinToneBtnText}>Explore →</Text>
-            </View>
+          <Text style={styles.heroSub}>
+            Discover colors that match your skin tone and elevate every look —
+            from makeup to wardrobe.
+          </Text>
+
+          <TouchableOpacity
+            style={styles.heroBtn}
+            onPress={() => router.push('/skinTone')}
+            activeOpacity={0.85}>
+            <Text style={styles.heroBtnText}>Start with Skin Tone →</Text>
           </TouchableOpacity>
-
         </View>
 
-        {/* Divider */}
+        {/* ─────────── PRIMARY CTA: SKIN TONE ─────────── */}
+        <TouchableOpacity
+          style={styles.primaryCard}
+          onPress={() => router.push('/skinTone')}
+          activeOpacity={0.85}>
+          <View style={styles.primaryLeft}>
+            <View style={styles.primaryIconRing}>
+              <Text style={styles.primaryIcon}>🎨</Text>
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.primaryTitle}>Skin Tone Finder</Text>
+              <Text style={styles.primaryDesc}>
+                Find your perfect shade and get personalized color picks.
+              </Text>
+            </View>
+          </View>
+          <View style={styles.primaryCta}>
+            <Text style={styles.primaryCtaText}>Explore →</Text>
+          </View>
+        </TouchableOpacity>
+
+        {/* ─────────── DIVIDER ─────────── */}
         <View style={styles.dividerRow}>
           <View style={styles.dividerLine} />
           <Text style={styles.dividerText}>FEATURES</Text>
           <View style={styles.dividerLine} />
         </View>
 
-        {/* 2x2 Feature Cards Grid */}
-        <View style={styles.cardGrid}>
-
-          <View style={styles.cardRow}>
-            <TouchableOpacity style={[styles.card, styles.cardPurple]} onPress={() => router.push('/colorMatch')}>
-              <Text style={styles.cardEmoji}>👗</Text>
-              <Text style={styles.cardTitle}>Color{'\n'}Matching</Text>
-              <Text style={styles.cardDesc}>Match your clothing colors for a flawless outfit.</Text>
-              <Text style={styles.cardArrow}>→</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity style={[styles.card, styles.cardRose]} onPress={() => router.push('/skinTone')}>
-              <Text style={styles.cardEmoji}>💄</Text>
-              <Text style={styles.cardTitle}>Makeup{'\n'}Colors</Text>
-              <Text style={styles.cardDesc}>Lipstick, eyeshadow & foundation tailored to you.</Text>
-              <Text style={styles.cardArrow}>→</Text>
-            </TouchableOpacity>
+        {/* ─────────── FEATURE GRID ─────────── */}
+        <View style={[styles.grid, !isWide && styles.gridNarrow]}>
+          <View style={styles.cardWrapper}>
+            <FeatureCard
+              emoji="👗"
+              title="Color Matching"
+              desc="Match your clothing colors for a flawless outfit."
+              accent="#8050C8"
+              bg="#1A102A"
+              onPress={() => router.push('/colorMatch')}
+            />
           </View>
 
-          <View style={styles.cardRow}>
-            <TouchableOpacity style={[styles.card, styles.cardDark]} onPress={() => router.push('/skinTone')}>
-              <Text style={styles.cardEmoji}>👁</Text>
-              <Text style={styles.cardTitle}>Contact{'\n'}Lens</Text>
-              <Text style={styles.cardDesc}>Find lens colors that complement your skin tone.</Text>
-              <Text style={styles.cardArrow}>→</Text>
-            </TouchableOpacity>
-
-            {/* ✅ FIXED: Navigate to Face Shape page */}
-            <TouchableOpacity style={[styles.card, styles.cardTeal]} onPress={() => router.push('/faceShape')}>
-              <Text style={styles.cardEmoji}>👓</Text>
-              <Text style={styles.cardTitle}>Face{'\n'}Shape</Text>
-              <Text style={styles.cardDesc}>Find the best frame shape for your face.</Text>
-              <Text style={styles.cardArrow}>→</Text>
-            </TouchableOpacity>
+          <View style={styles.cardWrapper}>
+            <FeatureCard
+              emoji="💄"
+              title="Makeup Colors"
+              desc="Lipstick, eyeshadow & foundation tailored to you."
+              accent="#C85080"
+              bg="#2A1018"
+              onPress={() => router.push('/skinTone')}
+            />
           </View>
 
+          <View style={styles.cardWrapper}>
+            <FeatureCard
+              emoji="👁"
+              title="Contact Lens"
+              desc="Find lens colors that complement your skin tone."
+              accent="#5080C8"
+              bg="#101A2A"
+              onPress={() => router.push('/skinTone')}
+            />
+          </View>
+
+          <View style={styles.cardWrapper}>
+            <FeatureCard
+              emoji="👓"
+              title="Face Shape"
+              desc="Find the best frame shape for your face."
+              accent="#508080"
+              bg="#0A1A1A"
+              onPress={() => router.push('/faceShape')}
+            />
+          </View>
         </View>
 
-        {/* Footer */}
+        {/* ─────────── FOOTER ─────────── */}
         <View style={styles.footer}>
+          <View style={styles.footerLine} />
           <Text style={styles.footerText}>Made with 💗 for your beauty journey</Text>
         </View>
 
@@ -89,141 +166,223 @@ export default function HomeScreen() {
   );
 }
 
+// ============================================
+// STYLES
+// ============================================
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#1A0A12' },
-  content: { padding: 16, paddingBottom: 48 },
+  container: {
+    flex: 1,
+    backgroundColor: '#1A0A12',
+  },
+  content: {
+    padding: 16,
+    paddingBottom: 48,
+    alignItems: 'center',
+  },
 
-  // Page Border
   pageBorder: {
+    width: '100%',
+    maxWidth: CONTENT_MAX,
     borderWidth: 1,
     borderColor: '#C8507A',
     borderRadius: 24,
-    padding: 16,
+    padding: 24,
     backgroundColor: '#1A0A12',
   },
 
-  // Hero Row
-  heroRow: {
-    flexDirection: 'row',
-    gap: 12,
-    marginBottom: 24,
-    alignItems: 'stretch',
-  },
-
-  // Hero Text
-  heroText: {
-    flex: 1,
-    justifyContent: 'center',
-    paddingVertical: 8,
+  // ─────────── HERO ───────────
+  hero: {
+    marginBottom: 28,
   },
   heroTag: {
-    fontSize: 9,
+    fontSize: 10,
     fontWeight: '700',
-    letterSpacing: 2,
+    letterSpacing: 3,
     color: '#C8507A',
-    marginBottom: 10,
+    marginBottom: 12,
   },
   heroTitle: {
-    fontSize: 30,
+    fontSize: isWide ? 44 : 34,
     fontWeight: '800',
     color: '#FFF0F5',
-    lineHeight: 36,
-    marginBottom: 12,
-    letterSpacing: -0.5,
+    lineHeight: isWide ? 52 : 42,
+    letterSpacing: -1,
+    marginBottom: 14,
   },
   heroSub: {
-    fontSize: 12,
+    fontSize: 14,
     color: '#A08090',
-    lineHeight: 18,
+    lineHeight: 22,
+    maxWidth: 520,
+    marginBottom: 22,
+  },
+  heroBtn: {
+    alignSelf: 'flex-start',
+    backgroundColor: '#C8507A',
+    paddingHorizontal: 22,
+    paddingVertical: 12,
+    borderRadius: 12,
+    shadowColor: '#C8507A',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.35,
+    shadowRadius: 14,
+    elevation: 6,
+  },
+  heroBtnText: {
+    color: '#FFF0F5',
+    fontSize: 13,
+    fontWeight: '700',
+    letterSpacing: 0.4,
   },
 
-  // Skin Tone Card (right side of hero)
-  skinToneCard: {
-    flex: 1,
+  // ─────────── PRIMARY SKIN TONE CARD ───────────
+  primaryCard: {
+    flexDirection: isWide ? 'row' : 'column',
+    alignItems: isWide ? 'center' : 'stretch',
+    justifyContent: 'space-between',
+    gap: 16,
     backgroundColor: '#2A1020',
-    borderRadius: 20,
-    padding: 16,
     borderWidth: 1,
     borderColor: '#C8507A',
-    justifyContent: 'space-between',
+    borderRadius: 20,
+    padding: 20,
+    marginBottom: 28,
   },
-  skinToneEmoji: { fontSize: 32, marginBottom: 8 },
-  skinToneTitle: {
+  primaryLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 14,
+    flex: 1,
+  },
+  primaryIconRing: {
+    width: 54,
+    height: 54,
+    borderRadius: 27,
+    borderWidth: 1,
+    borderColor: 'rgba(200, 80, 122, 0.4)',
+    backgroundColor: 'rgba(200, 80, 122, 0.12)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  primaryIcon: {
+    fontSize: 26,
+  },
+  primaryTitle: {
     fontSize: 18,
     fontWeight: '800',
     color: '#FFF0F5',
-    marginBottom: 8,
-    lineHeight: 24,
+    marginBottom: 4,
   },
-  skinToneDesc: {
-    fontSize: 11,
+  primaryDesc: {
+    fontSize: 12,
     color: '#A08090',
-    lineHeight: 16,
-    marginBottom: 14,
+    lineHeight: 17,
   },
-  skinToneBtn: {
+  primaryCta: {
     backgroundColor: '#C8507A',
+    paddingHorizontal: 18,
+    paddingVertical: 12,
     borderRadius: 12,
-    paddingVertical: 8,
     alignItems: 'center',
   },
-  skinToneBtnText: {
+  primaryCtaText: {
     color: '#FFF0F5',
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: '700',
   },
 
-  // Divider
+  // ─────────── DIVIDER ───────────
   dividerRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: 20,
   },
-  dividerLine: { flex: 1, height: 1, backgroundColor: '#3D1830' },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: '#3D1830',
+  },
   dividerText: {
     fontSize: 9,
     fontWeight: '700',
-    letterSpacing: 2,
+    letterSpacing: 3,
     color: '#C8507A',
-    marginHorizontal: 10,
+    marginHorizontal: 12,
   },
 
-  // Card Grid
-  cardGrid: { gap: 12 },
-  cardRow: { flexDirection: 'row', gap: 12 },
+  // ─────────── FEATURE GRID ───────────
+  grid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 14,
+    marginBottom: 24,
+  },
+  gridNarrow: {
+    flexDirection: 'column',
+  },
+  cardWrapper: {
+    flex: isWide ? 1 : undefined,
+    minWidth: isWide ? 220 : '100%',
+    width: isWide ? undefined : '100%',
+  },
+
   card: {
-    flex: 1,
-    borderRadius: 20,
-    padding: 16,
+    borderRadius: 18,
     borderWidth: 1,
+    padding: 18,
+    height: 200,
+    justifyContent: 'space-between',
+    overflow: 'hidden',
   },
-  cardPurple: { backgroundColor: '#1A102A', borderColor: '#8050C8' },
-  cardRose: { backgroundColor: '#2A1018', borderColor: '#C85080' },
-  cardDark: { backgroundColor: '#101A2A', borderColor: '#5080C8' },
-  cardTeal: { backgroundColor: '#0A1A1A', borderColor: '#508080' },
-
-  cardEmoji: { fontSize: 28, marginBottom: 10 },
+  iconRing: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 14,
+    backgroundColor: 'rgba(255,255,255,0.03)',
+  },
+  icon: {
+    fontSize: 22,
+  },
   cardTitle: {
-    fontSize: 15,
+    fontSize: 16,
     fontWeight: '700',
     color: '#FFF0F5',
     marginBottom: 6,
-    lineHeight: 20,
+    lineHeight: 21,
   },
   cardDesc: {
     fontSize: 11,
     color: '#A08090',
     lineHeight: 16,
-    marginBottom: 12,
+    flex: 1,
+  },
+  cardFooter: {
+    alignItems: 'flex-end',
+    marginTop: 8,
   },
   cardArrow: {
-    fontSize: 16,
-    color: '#C8507A',
+    fontSize: 18,
     fontWeight: '700',
-    alignSelf: 'flex-end',
   },
 
-  // Footer
-  footer: { alignItems: 'center', paddingTop: 24 },
-  footerText: { fontSize: 12, color: '#3D1830' },
+  // ─────────── FOOTER ───────────
+  footer: {
+    alignItems: 'center',
+    paddingTop: 8,
+  },
+  footerLine: {
+    width: 40,
+    height: 1,
+    backgroundColor: '#3D1830',
+    marginBottom: 14,
+  },
+  footerText: {
+    fontSize: 11,
+    color: '#5A2838',
+    letterSpacing: 0.4,
+  },
 });
