@@ -74,254 +74,287 @@ export default function ColorMatchScreen() {
 
   const getMatches = () => {
     if (!selected) return [];
-    return (matchingColors[selected.name] || []).map(name =>
-      colorOptions.find(c => c.name === name)
-    ).filter(Boolean);
+    return (matchingColors[selected.name] || [])
+      .map(name => colorOptions.find(c => c.name === name))
+      .filter(Boolean);
   };
 
   return (
-    <ScrollView
-      style={styles.container}
-      showsVerticalScrollIndicator={false}
-      contentContainerStyle={styles.content}>
+    <View style={styles.container}>
 
-      {/* Page Border */}
-      <View style={styles.pageBorder}>
-
-        {/* Header */}
+      {/* Header */}
+      <View style={styles.header}>
         <Text style={styles.pageTag}>BEAUTY MATCH</Text>
         <Text style={styles.pageTitle}>Color Matching</Text>
         <Text style={styles.pageSubtitle}>Pick a color to discover perfect combinations</Text>
+      </View>
 
-        {/* Color Grid */}
-        <View style={styles.selectorCard}>
-          <Text style={styles.sectionLabel}>SELECT A COLOR</Text>
-          <View style={styles.grid}>
+      {/* Split Layout */}
+      <View style={styles.splitLayout}>
+
+        {/* ── LEFT: Color Picker ── */}
+        <View style={styles.leftPanel}>
+          <Text style={styles.panelLabel}>SELECT</Text>
+          <ScrollView showsVerticalScrollIndicator={false}>
             {colorOptions.map((item) => (
               <TouchableOpacity
                 key={item.id}
                 style={[
-                  styles.colorCard,
-                  { backgroundColor: item.color },
-                  selected?.id === item.id && styles.selectedCard,
-                  lightColors.includes(item.color) && styles.lightCard,
+                  styles.colorRow,
+                  selected?.id === item.id && styles.colorRowSelected,
                 ]}
                 onPress={() => setSelected(item)}>
-                {selected?.id === item.id && (
-                  <View style={styles.checkmark}>
-                    <Text style={styles.checkmarkText}>✓</Text>
-                  </View>
-                )}
+                <View style={[
+                  styles.colorDot,
+                  { backgroundColor: item.color },
+                  lightColors.includes(item.color) && { borderWidth: 1, borderColor: '#555' },
+                ]} />
                 <Text style={[
-                  styles.colorName,
-                  lightColors.includes(item.color) ? { color: '#333' } : { color: '#fff' }
+                  styles.colorRowName,
+                  selected?.id === item.id && styles.colorRowNameSelected,
                 ]}>
                   {item.name}
                 </Text>
+                {selected?.id === item.id && (
+                  <Text style={styles.checkIcon}>✓</Text>
+                )}
               </TouchableOpacity>
             ))}
-          </View>
+          </ScrollView>
         </View>
 
-        {/* Results */}
-        {selected && (
-          <View style={styles.resultCard}>
-            {/* Selected color display */}
-            <View style={styles.selectedDisplay}>
-              <View style={[
-                styles.selectedCircle,
-                { backgroundColor: selected.color },
-                lightColors.includes(selected.color) && { borderWidth: 1, borderColor: '#555' }
-              ]} />
-              <View>
-                <Text style={styles.selectedLabel}>Selected</Text>
-                <Text style={styles.selectedName}>{selected.name}</Text>
+        {/* Vertical Divider */}
+        <View style={styles.verticalDivider} />
+
+        {/* ── RIGHT: Match Results ── */}
+        <View style={styles.rightPanel}>
+          <Text style={styles.panelLabel}>MATCHES</Text>
+
+          {!selected && (
+            <View style={styles.emptyState}>
+              <Text style={styles.emptyEmoji}>👈</Text>
+              <Text style={styles.emptyText}>Pick a color on the left</Text>
+            </View>
+          )}
+
+          {selected && (
+            <ScrollView showsVerticalScrollIndicator={false}>
+
+              {/* Selected preview */}
+              <View style={styles.selectedPreview}>
+                <View style={[
+                  styles.selectedPreviewCircle,
+                  { backgroundColor: selected.color },
+                  lightColors.includes(selected.color) && { borderWidth: 1, borderColor: '#555' },
+                ]} />
+                <Text style={styles.selectedPreviewName}>{selected.name}</Text>
               </View>
-            </View>
 
-            {/* Divider */}
-            <View style={styles.dividerRow}>
-              <View style={styles.dividerLine} />
-              <Text style={styles.dividerText}>BEST MATCHES</Text>
-              <View style={styles.dividerLine} />
-            </View>
+              {/* Divider */}
+              <View style={styles.dividerRow}>
+                <View style={styles.dividerLine} />
+                <Text style={styles.dividerText}>PAIRS WITH</Text>
+                <View style={styles.dividerLine} />
+              </View>
 
-            {/* Match Cards */}
-            <View style={styles.matchGrid}>
+              {/* Match items */}
               {getMatches().map((match) => match && (
-                <View key={match.id} style={styles.matchItem}>
+                <View key={match.id} style={styles.matchRow}>
                   <View style={[
-                    styles.matchCircle,
+                    styles.matchDot,
                     { backgroundColor: match.color },
-                    lightColors.includes(match.color) && { borderWidth: 1, borderColor: '#555' }
+                    lightColors.includes(match.color) && { borderWidth: 1, borderColor: '#555' },
                   ]} />
                   <Text style={styles.matchName}>{match.name}</Text>
+
+                  {/* Color combo preview */}
+                  <View style={styles.comboPreview}>
+                    <View style={[styles.comboHalf, { backgroundColor: selected.color }]} />
+                    <View style={[styles.comboHalf, { backgroundColor: match.color }]} />
+                  </View>
                 </View>
               ))}
-            </View>
 
-            {/* Tip */}
-            <View style={styles.tipBox}>
-              <Text style={styles.tipText}>
-                💡 {selected.name} pairs beautifully with these shades for a balanced and stylish outfit!
-              </Text>
-            </View>
-          </View>
-        )}
+              {/* Tip */}
+              <View style={styles.tipBox}>
+                <Text style={styles.tipText}>
+                  💡 {selected.name} pairs beautifully with these shades!
+                </Text>
+              </View>
 
-        {/* Empty state */}
-        {!selected && (
-          <View style={styles.emptyState}>
-            <Text style={styles.emptyEmoji}>👆</Text>
-            <Text style={styles.emptyText}>Tap any color above to see matching combinations</Text>
-          </View>
-        )}
+            </ScrollView>
+          )}
+        </View>
 
       </View>
-    </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#1A0A12' },
-  content: { padding: 16, paddingBottom: 48 },
 
-  // Page Border
-  pageBorder: {
+  // Header
+  header: {
     borderWidth: 1,
     borderColor: '#C8507A',
-    borderRadius: 24,
+    borderRadius: 20,
+    margin: 16,
+    marginBottom: 8,
     padding: 16,
     backgroundColor: '#1A0A12',
   },
-
-  // Header
   pageTag: { fontSize: 10, fontWeight: '700', letterSpacing: 3, color: '#C8507A', marginBottom: 4 },
-  pageTitle: { fontSize: 26, fontWeight: '800', color: '#FFF0F5', letterSpacing: -0.5, marginBottom: 6 },
-  pageSubtitle: { fontSize: 13, color: '#A08090', marginBottom: 20 },
+  pageTitle: { fontSize: 24, fontWeight: '800', color: '#FFF0F5', letterSpacing: -0.5, marginBottom: 4 },
+  pageSubtitle: { fontSize: 12, color: '#A08090' },
 
-  // Selector Card
-  selectorCard: {
-    backgroundColor: '#2A1020',
-    borderRadius: 20,
-    padding: 16,
+  // Split Layout
+  splitLayout: {
+    flex: 1,
+    flexDirection: 'row',
+    marginHorizontal: 16,
     marginBottom: 16,
     borderWidth: 1,
-    borderColor: '#3D1830',
+    borderColor: '#C8507A',
+    borderRadius: 20,
+    overflow: 'hidden',
+    backgroundColor: '#1A0A12',
   },
-  sectionLabel: {
+
+  // Left Panel
+  leftPanel: {
+    width: '42%',
+    backgroundColor: '#2A1020',
+    padding: 12,
+  },
+  panelLabel: {
     fontSize: 9,
     fontWeight: '700',
     letterSpacing: 2,
     color: '#C8507A',
-    marginBottom: 14,
+    marginBottom: 12,
+    textAlign: 'center',
   },
-  grid: {
+  colorRow: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
+    alignItems: 'center',
+    paddingVertical: 8,
+    paddingHorizontal: 8,
+    borderRadius: 12,
+    marginBottom: 4,
     gap: 8,
-    justifyContent: 'center',
   },
-  colorCard: {
-    width: 70,
-    height: 70,
-    borderRadius: 14,
-    justifyContent: 'flex-end',
-    alignItems: 'center',
-    paddingBottom: 8,
-    position: 'relative',
-  },
-  lightCard: {
+  colorRowSelected: {
+    backgroundColor: '#3D1020',
     borderWidth: 1,
-    borderColor: '#3D1830',
-  },
-  selectedCard: {
-    borderWidth: 3,
     borderColor: '#C8507A',
-    shadowColor: '#C8507A',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.8,
-    shadowRadius: 8,
-    elevation: 8,
   },
-  checkmark: {
-    position: 'absolute',
-    top: 6,
-    right: 6,
-    backgroundColor: '#C8507A',
-    borderRadius: 10,
-    width: 18,
-    height: 18,
-    justifyContent: 'center',
-    alignItems: 'center',
+  colorDot: {
+    width: 28,
+    height: 28,
+    borderRadius: 8,
   },
-  checkmarkText: { color: '#fff', fontSize: 10, fontWeight: '700' },
-  colorName: { fontSize: 9, fontWeight: '700', textAlign: 'center' },
+  colorRowName: {
+    flex: 1,
+    fontSize: 11,
+    color: '#A08090',
+    fontWeight: '500',
+  },
+  colorRowNameSelected: {
+    color: '#FFF0F5',
+    fontWeight: '700',
+  },
+  checkIcon: {
+    fontSize: 12,
+    color: '#C8507A',
+    fontWeight: '700',
+  },
 
-  // Result Card
-  resultCard: {
+  // Vertical Divider
+  verticalDivider: {
+    width: 1,
+    backgroundColor: '#3D1830',
+  },
+
+  // Right Panel
+  rightPanel: {
+    flex: 1,
+    padding: 12,
+    backgroundColor: '#1A0A12',
+  },
+
+  // Selected Preview
+  selectedPreview: {
+    alignItems: 'center',
+    marginBottom: 14,
+    padding: 12,
     backgroundColor: '#2A1020',
-    borderRadius: 20,
-    padding: 16,
+    borderRadius: 14,
     borderWidth: 1,
     borderColor: '#3D1830',
   },
-  selectedDisplay: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 16,
-    gap: 14,
-  },
-  selectedCircle: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    shadowColor: '#C8507A',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.4,
-    shadowRadius: 8,
-    elevation: 6,
-  },
-  selectedLabel: { fontSize: 11, color: '#A08090', marginBottom: 4 },
-  selectedName: { fontSize: 22, fontWeight: '700', color: '#FFF0F5' },
-
-  // Divider
-  dividerRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 16 },
-  dividerLine: { flex: 1, height: 1, backgroundColor: '#3D1830' },
-  dividerText: { fontSize: 9, fontWeight: '700', letterSpacing: 2, color: '#C8507A', marginHorizontal: 10 },
-
-  // Match Grid
-  matchGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 12,
-    justifyContent: 'center',
-    marginBottom: 16,
-  },
-  matchItem: { alignItems: 'center', width: 64 },
-  matchCircle: {
+  selectedPreviewCircle: {
     width: 52,
     height: 52,
     borderRadius: 26,
-    marginBottom: 6,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 3,
+    marginBottom: 8,
   },
-  matchName: { fontSize: 10, color: '#A08090', textAlign: 'center', fontWeight: '500' },
+  selectedPreviewName: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#FFF0F5',
+  },
+
+  // Divider
+  dividerRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 12 },
+  dividerLine: { flex: 1, height: 1, backgroundColor: '#3D1830' },
+  dividerText: { fontSize: 8, fontWeight: '700', letterSpacing: 2, color: '#C8507A', marginHorizontal: 6 },
+
+  // Match Row
+  matchRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 8,
+    borderRadius: 12,
+    marginBottom: 6,
+    backgroundColor: '#2A1020',
+    borderWidth: 1,
+    borderColor: '#3D1830',
+    gap: 8,
+  },
+  matchDot: {
+    width: 28,
+    height: 28,
+    borderRadius: 8,
+  },
+  matchName: {
+    flex: 1,
+    fontSize: 11,
+    color: '#FFF0F5',
+    fontWeight: '600',
+  },
+  comboPreview: {
+    flexDirection: 'row',
+    width: 36,
+    height: 20,
+    borderRadius: 6,
+    overflow: 'hidden',
+  },
+  comboHalf: {
+    flex: 1,
+  },
 
   // Tip
   tipBox: {
     backgroundColor: '#3D1830',
     borderRadius: 12,
-    padding: 12,
+    padding: 10,
+    marginTop: 8,
   },
-  tipText: { fontSize: 12, color: '#C8507A', lineHeight: 18 },
+  tipText: { fontSize: 11, color: '#C8507A', lineHeight: 16 },
 
   // Empty State
-  emptyState: { alignItems: 'center', paddingVertical: 40 },
-  emptyEmoji: { fontSize: 40, marginBottom: 12 },
-  emptyText: { fontSize: 14, color: '#A08090', textAlign: 'center', lineHeight: 22 },
+  emptyState: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingTop: 60 },
+  emptyEmoji: { fontSize: 36, marginBottom: 12 },
+  emptyText: { fontSize: 12, color: '#A08090', textAlign: 'center', lineHeight: 18 },
 });
