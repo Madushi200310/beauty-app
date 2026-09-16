@@ -10,10 +10,10 @@ import {
 
 const { width } = Dimensions.get('window');
 const isWide = width > 900;
-const CONTENT_MAX = 1100;
+const CONTENT_MAX = 1180;
 
 // ============================================
-// REUSABLE FEATURE CARD
+// FEATURE CARD (small tile)
 // ============================================
 type FeatureCardProps = {
   emoji: string;
@@ -21,25 +21,53 @@ type FeatureCardProps = {
   desc: string;
   accent: string;
   bg: string;
+  tag: string;
   onPress: () => void;
 };
 
-function FeatureCard({ emoji, title, desc, accent, bg, onPress }: FeatureCardProps) {
+function FeatureCard({
+  emoji,
+  title,
+  desc,
+  accent,
+  bg,
+  tag,
+  onPress,
+}: FeatureCardProps) {
   return (
     <TouchableOpacity
-      style={[styles.card, { backgroundColor: bg, borderColor: accent }]}
+      style={[styles.card, { backgroundColor: bg, borderColor: accent + '55' }]}
       onPress={onPress}
       activeOpacity={0.85}>
 
-      <View style={[styles.iconRing, { borderColor: accent }]}>
-        <Text style={styles.icon}>{emoji}</Text>
+      {/* Top row: icon ring + tag */}
+      <View style={styles.cardTopRow}>
+        <View
+          style={[
+            styles.iconRing,
+            {
+              borderColor: accent + '88',
+              backgroundColor: accent + '18',
+            },
+          ]}>
+          <Text style={styles.icon}>{emoji}</Text>
+        </View>
+
+        <Text style={[styles.cardTag, { color: accent }]}>{tag}</Text>
       </View>
 
-      <Text style={styles.cardTitle}>{title}</Text>
-      <Text style={styles.cardDesc}>{desc}</Text>
+      {/* Bottom: title + desc + arrow */}
+      <View>
+        <Text style={styles.cardTitle}>{title}</Text>
+        <Text style={styles.cardDesc} numberOfLines={2}>
+          {desc}
+        </Text>
+      </View>
 
-      <View style={styles.cardFooter}>
-        <Text style={[styles.cardArrow, { color: accent }]}>→</Text>
+      <View style={styles.cardArrowRow}>
+        <View style={[styles.cardArrowCircle, { borderColor: accent + '88' }]}>
+          <Text style={[styles.cardArrow, { color: accent }]}>→</Text>
+        </View>
       </View>
     </TouchableOpacity>
   );
@@ -59,64 +87,116 @@ export default function HomeScreen() {
 
       <View style={styles.pageBorder}>
 
-        {/* ─────────── HERO ─────────── */}
+        {/* ═══════════ EDITORIAL HERO ═══════════ */}
         <View style={styles.hero}>
-          <Text style={styles.heroTag}>YOUR PERSONAL BEAUTY GUIDE</Text>
+          {/* Dot grid accent (top-right) */}
+          <View style={styles.dotGrid} pointerEvents="none">
+            {Array.from({ length: 12 }).map((_, i) => (
+              <View key={i} style={styles.dotGridDot} />
+            ))}
+          </View>
+
+          <View style={styles.heroTopRow}>
+            <View style={styles.heroTagPill}>
+              <Text style={styles.heroTagText}>
+                ● YOUR PERSONAL BEAUTY GUIDE
+              </Text>
+            </View>
+
+            <Text style={styles.heroIssue}>ISSUE 01 · 2026</Text>
+          </View>
 
           <Text style={styles.heroTitle}>
-            Glow Up{'\n'}Your Style ✨
+            Glow Up{'\n'}
+            Your Style{' '}
+            <Text style={styles.heroSparkle}>✨</Text>
           </Text>
 
           <Text style={styles.heroSub}>
-            Discover colors that match your skin tone and elevate every look —
-            from makeup to wardrobe.
+            A curated color guide for your skin tone — from wardrobe to
+            makeup. Discover what truly flatters you.
           </Text>
 
-          <TouchableOpacity
-            style={styles.heroBtn}
-            onPress={() => router.push('/skinTone')}
-            activeOpacity={0.85}>
-            <Text style={styles.heroBtnText}>Start with Skin Tone →</Text>
-          </TouchableOpacity>
+          <View style={styles.heroCtaRow}>
+            <TouchableOpacity
+              style={styles.heroBtnPrimary}
+              onPress={() => router.push('/skinTone')}
+              activeOpacity={0.85}>
+              <Text style={styles.heroBtnPrimaryText}>
+                Start with Skin Tone
+              </Text>
+              <Text style={styles.heroBtnPrimaryArrow}>→</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.heroBtnGhost}
+              onPress={() => router.push('/colorMatch')}
+              activeOpacity={0.85}>
+              <Text style={styles.heroBtnGhostText}>Explore Colors</Text>
+            </TouchableOpacity>
+          </View>
         </View>
 
-        {/* ─────────── PRIMARY CTA: SKIN TONE ─────────── */}
+        {/* ═══════════ SPOTLIGHT: SKIN TONE ═══════════ */}
         <TouchableOpacity
-          style={styles.primaryCard}
+          style={styles.spotlight}
           onPress={() => router.push('/skinTone')}
-          activeOpacity={0.85}>
-          <View style={styles.primaryLeft}>
-            <View style={styles.primaryIconRing}>
-              <Text style={styles.primaryIcon}>🎨</Text>
+          activeOpacity={0.9}>
+
+          {/* Left: content */}
+          <View style={styles.spotlightContent}>
+            <View style={styles.spotlightEyebrowRow}>
+              <View style={styles.spotlightDot} />
+              <Text style={styles.spotlightEyebrow}>START HERE</Text>
             </View>
-            <View style={{ flex: 1 }}>
-              <Text style={styles.primaryTitle}>Skin Tone Finder</Text>
-              <Text style={styles.primaryDesc}>
-                Find your perfect shade and get personalized color picks.
-              </Text>
+
+            <Text style={styles.spotlightTitle}>
+              Skin Tone{'\n'}Finder
+            </Text>
+
+            <Text style={styles.spotlightDesc}>
+              Move the slider to your shade and unlock a palette tailored to
+              your undertone.
+            </Text>
+
+            <View style={styles.spotlightBtn}>
+              <Text style={styles.spotlightBtnText}>Find My Shade</Text>
+              <Text style={styles.spotlightBtnArrow}>→</Text>
             </View>
           </View>
-          <View style={styles.primaryCta}>
-            <Text style={styles.primaryCtaText}>Explore →</Text>
+
+          {/* Right: decorative gradient stack */}
+          <View style={styles.spotlightVisual} pointerEvents="none">
+            <View style={[styles.swatch, { backgroundColor: '#FFE8D6' }]} />
+            <View style={[styles.swatch, { backgroundColor: '#F0B27A' }]} />
+            <View style={[styles.swatch, { backgroundColor: '#A0522D' }]} />
+            <View style={[styles.swatch, { backgroundColor: '#5C2810' }]} />
+            <Text style={styles.swatchLabel}>50 shades</Text>
           </View>
         </TouchableOpacity>
 
-        {/* ─────────── DIVIDER ─────────── */}
-        <View style={styles.dividerRow}>
-          <View style={styles.dividerLine} />
-          <Text style={styles.dividerText}>FEATURES</Text>
-          <View style={styles.dividerLine} />
+        {/* ═══════════ SECTION HEADER ═══════════ */}
+        <View style={styles.sectionHeader}>
+          <View style={styles.sectionHeaderLeft}>
+            <Text style={styles.sectionIndex}>02</Text>
+            <View>
+              <Text style={styles.sectionTag}>EXPLORE THE TOOLKIT</Text>
+              <Text style={styles.sectionTitle}>More Features</Text>
+            </View>
+          </View>
+          <View style={styles.sectionHeaderLine} />
         </View>
 
-        {/* ─────────── FEATURE GRID ─────────── */}
+        {/* ═══════════ FEATURE GRID ═══════════ */}
         <View style={[styles.grid, !isWide && styles.gridNarrow]}>
           <View style={styles.cardWrapper}>
             <FeatureCard
               emoji="👗"
               title="Color Matching"
-              desc="Match your clothing colors for a flawless outfit."
-              accent="#8050C8"
+              desc="Pair wardrobe colors for a flawless look."
+              accent="#B57CE0"
               bg="#1A102A"
+              tag="STYLE"
               onPress={() => router.push('/colorMatch')}
             />
           </View>
@@ -125,9 +205,10 @@ export default function HomeScreen() {
             <FeatureCard
               emoji="💄"
               title="Makeup Colors"
-              desc="Lipstick, eyeshadow & foundation tailored to you."
-              accent="#C85080"
+              desc="Lip, eye & base shades tailored to you."
+              accent="#E87BA0"
               bg="#2A1018"
+              tag="BEAUTY"
               onPress={() => router.push('/skinTone')}
             />
           </View>
@@ -136,9 +217,10 @@ export default function HomeScreen() {
             <FeatureCard
               emoji="👁"
               title="Contact Lens"
-              desc="Find lens colors that complement your skin tone."
-              accent="#5080C8"
+              desc="Lens tones that complement your skin."
+              accent="#7CA5E0"
               bg="#101A2A"
+              tag="EYES"
               onPress={() => router.push('/skinTone')}
             />
           </View>
@@ -147,18 +229,24 @@ export default function HomeScreen() {
             <FeatureCard
               emoji="👓"
               title="Face Shape"
-              desc="Find the best frame shape for your face."
-              accent="#508080"
+              desc="Discover the best frames for you."
+              accent="#7CC6C6"
               bg="#0A1A1A"
+              tag="ACCESSORY"
               onPress={() => router.push('/faceShape')}
             />
           </View>
         </View>
 
-        {/* ─────────── FOOTER ─────────── */}
+        {/* ═══════════ FOOTER ═══════════ */}
         <View style={styles.footer}>
+          <View style={styles.footerDot} />
           <View style={styles.footerLine} />
-          <Text style={styles.footerText}>Made with 💗 for your beauty journey</Text>
+          <Text style={styles.footerText}>
+            Made with 💗 for your beauty journey
+          </Text>
+          <View style={styles.footerLine} />
+          <View style={styles.footerDot} />
         </View>
 
       </View>
@@ -170,10 +258,7 @@ export default function HomeScreen() {
 // STYLES
 // ============================================
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#1A0A12',
-  },
+  container: { flex: 1, backgroundColor: '#1A0A12' },
   content: {
     padding: 16,
     paddingBottom: 48,
@@ -186,199 +271,345 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#C8507A',
     borderRadius: 24,
-    padding: 24,
+    padding: isWide ? 32 : 20,
     backgroundColor: '#1A0A12',
   },
 
-  // ─────────── HERO ───────────
+  // ═══════════ HERO ═══════════
   hero: {
-    marginBottom: 28,
+    position: 'relative',
+    paddingVertical: 12,
+    marginBottom: 32,
   },
-  heroTag: {
+  dotGrid: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    width: 84,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    opacity: 0.35,
+  },
+  dotGridDot: {
+    width: 3,
+    height: 3,
+    borderRadius: 1.5,
+    backgroundColor: '#C8507A',
+  },
+  heroTopRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 22,
+    flexWrap: 'wrap',
+    gap: 12,
+  },
+  heroTagPill: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(200, 80, 122, 0.4)',
+    backgroundColor: 'rgba(200, 80, 122, 0.08)',
+  },
+  heroTagText: {
     fontSize: 10,
     fontWeight: '700',
-    letterSpacing: 3,
+    letterSpacing: 2,
     color: '#C8507A',
-    marginBottom: 12,
+  },
+  heroIssue: {
+    fontSize: 10,
+    fontWeight: '700',
+    letterSpacing: 2,
+    color: '#5A2838',
   },
   heroTitle: {
-    fontSize: isWide ? 44 : 34,
+    fontSize: isWide ? 60 : 42,
     fontWeight: '800',
     color: '#FFF0F5',
-    lineHeight: isWide ? 52 : 42,
-    letterSpacing: -1,
-    marginBottom: 14,
+    lineHeight: isWide ? 68 : 50,
+    letterSpacing: -1.8,
+    marginBottom: 18,
+  },
+  heroSparkle: {
+    fontSize: isWide ? 48 : 34,
   },
   heroSub: {
     fontSize: 14,
     color: '#A08090',
     lineHeight: 22,
-    maxWidth: 520,
-    marginBottom: 22,
+    maxWidth: 560,
+    marginBottom: 26,
   },
-  heroBtn: {
-    alignSelf: 'flex-start',
+  heroCtaRow: {
+    flexDirection: 'row',
+    gap: 12,
+    flexWrap: 'wrap',
+  },
+  heroBtnPrimary: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
     backgroundColor: '#C8507A',
     paddingHorizontal: 22,
-    paddingVertical: 12,
+    paddingVertical: 14,
     borderRadius: 12,
-    shadowColor: '#C8507A',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.35,
-    shadowRadius: 14,
+    boxShadow: '0px 8px 20px rgba(200, 80, 122, 0.35)',
     elevation: 6,
   },
-  heroBtnText: {
+  heroBtnPrimaryText: {
     color: '#FFF0F5',
     fontSize: 13,
     fontWeight: '700',
     letterSpacing: 0.4,
   },
+  heroBtnPrimaryArrow: {
+    color: '#FFF0F5',
+    fontSize: 15,
+    fontWeight: '700',
+  },
+  heroBtnGhost: {
+    paddingHorizontal: 22,
+    paddingVertical: 14,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(200, 80, 122, 0.4)',
+    backgroundColor: 'rgba(200, 80, 122, 0.05)',
+  },
+  heroBtnGhostText: {
+    color: '#C8507A',
+    fontSize: 13,
+    fontWeight: '700',
+    letterSpacing: 0.4,
+  },
 
-  // ─────────── PRIMARY SKIN TONE CARD ───────────
-  primaryCard: {
+  // ═══════════ SPOTLIGHT ═══════════
+  spotlight: {
     flexDirection: isWide ? 'row' : 'column',
-    alignItems: isWide ? 'center' : 'stretch',
+    alignItems: 'stretch',
     justifyContent: 'space-between',
-    gap: 16,
+    gap: 20,
     backgroundColor: '#2A1020',
     borderWidth: 1,
-    borderColor: '#C8507A',
-    borderRadius: 20,
-    padding: 20,
-    marginBottom: 28,
+    borderColor: 'rgba(200, 80, 122, 0.5)',
+    borderRadius: 24,
+    padding: isWide ? 28 : 22,
+    marginBottom: 36,
+    overflow: 'hidden',
+    position: 'relative',
   },
-  primaryLeft: {
+  spotlightContent: {
+    flex: 1,
+    justifyContent: 'center',
+    zIndex: 2,
+  },
+  spotlightEyebrowRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 12,
+  },
+  spotlightDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#C8507A',
+  },
+  spotlightEyebrow: {
+    fontSize: 10,
+    fontWeight: '700',
+    letterSpacing: 2.5,
+    color: '#C8507A',
+  },
+  spotlightTitle: {
+    fontSize: isWide ? 36 : 28,
+    fontWeight: '800',
+    color: '#FFF0F5',
+    lineHeight: isWide ? 42 : 34,
+    letterSpacing: -0.8,
+    marginBottom: 12,
+  },
+  spotlightDesc: {
+    fontSize: 13,
+    color: '#A08090',
+    lineHeight: 20,
+    marginBottom: 20,
+    maxWidth: 400,
+  },
+  spotlightBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    alignSelf: 'flex-start',
+    backgroundColor: '#C8507A',
+    paddingHorizontal: 18,
+    paddingVertical: 11,
+    borderRadius: 10,
+  },
+  spotlightBtnText: {
+    color: '#FFF0F5',
+    fontSize: 12,
+    fontWeight: '700',
+    letterSpacing: 0.3,
+  },
+  spotlightBtnArrow: {
+    color: '#FFF0F5',
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  spotlightVisual: {
+    flexDirection: isWide ? 'column' : 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10,
+    minWidth: isWide ? 180 : undefined,
+    paddingVertical: isWide ? 0 : 8,
+  },
+  swatch: {
+    width: isWide ? 160 : 60,
+    height: isWide ? 44 : 60,
+    borderRadius: isWide ? 12 : 30,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 240, 245, 0.15)',
+  },
+  swatchLabel: {
+    fontSize: 10,
+    fontWeight: '700',
+    letterSpacing: 2,
+    color: '#A08090',
+    marginTop: isWide ? 8 : 0,
+    marginLeft: isWide ? 0 : 8,
+  },
+
+  // ═══════════ SECTION HEADER ═══════════
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
+    marginBottom: 20,
+  },
+  sectionHeaderLeft: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 14,
-    flex: 1,
   },
-  primaryIconRing: {
-    width: 54,
-    height: 54,
-    borderRadius: 27,
-    borderWidth: 1,
-    borderColor: 'rgba(200, 80, 122, 0.4)',
-    backgroundColor: 'rgba(200, 80, 122, 0.12)',
-    alignItems: 'center',
-    justifyContent: 'center',
+  sectionIndex: {
+    fontSize: 28,
+    fontWeight: '800',
+    color: 'rgba(200, 80, 122, 0.35)',
+    letterSpacing: -1,
   },
-  primaryIcon: {
-    fontSize: 26,
+  sectionTag: {
+    fontSize: 9,
+    fontWeight: '700',
+    letterSpacing: 2.5,
+    color: '#C8507A',
+    marginBottom: 2,
   },
-  primaryTitle: {
+  sectionTitle: {
     fontSize: 18,
     fontWeight: '800',
     color: '#FFF0F5',
-    marginBottom: 4,
+    letterSpacing: -0.3,
   },
-  primaryDesc: {
-    fontSize: 12,
-    color: '#A08090',
-    lineHeight: 17,
-  },
-  primaryCta: {
-    backgroundColor: '#C8507A',
-    paddingHorizontal: 18,
-    paddingVertical: 12,
-    borderRadius: 12,
-    alignItems: 'center',
-  },
-  primaryCtaText: {
-    color: '#FFF0F5',
-    fontSize: 13,
-    fontWeight: '700',
-  },
-
-  // ─────────── DIVIDER ───────────
-  dividerRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  dividerLine: {
+  sectionHeaderLine: {
     flex: 1,
     height: 1,
     backgroundColor: '#3D1830',
   },
-  dividerText: {
-    fontSize: 9,
-    fontWeight: '700',
-    letterSpacing: 3,
-    color: '#C8507A',
-    marginHorizontal: 12,
-  },
 
-  // ─────────── FEATURE GRID ───────────
+  // ═══════════ FEATURE GRID ═══════════
   grid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 14,
-    marginBottom: 24,
+    marginBottom: 32,
   },
-  gridNarrow: {
-    flexDirection: 'column',
-  },
+  gridNarrow: { flexDirection: 'column' },
   cardWrapper: {
     flex: isWide ? 1 : undefined,
-    minWidth: isWide ? 220 : '100%',
+    minWidth: isWide ? 230 : '100%',
     width: isWide ? undefined : '100%',
   },
 
+  // ═══════════ FEATURE CARD ═══════════
   card: {
-    borderRadius: 18,
+    borderRadius: 20,
     borderWidth: 1,
-    padding: 18,
-    height: 200,
+    padding: 20,
+    minHeight: 220,
     justifyContent: 'space-between',
-    overflow: 'hidden',
+  },
+  cardTopRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 22,
   },
   iconRing: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+    width: 48,
+    height: 48,
+    borderRadius: 24,
     borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 14,
-    backgroundColor: 'rgba(255,255,255,0.03)',
   },
-  icon: {
-    fontSize: 22,
+  icon: { fontSize: 22 },
+  cardTag: {
+    fontSize: 9,
+    fontWeight: '700',
+    letterSpacing: 1.8,
   },
   cardTitle: {
-    fontSize: 16,
-    fontWeight: '700',
+    fontSize: 17,
+    fontWeight: '800',
     color: '#FFF0F5',
     marginBottom: 6,
-    lineHeight: 21,
+    letterSpacing: -0.3,
   },
   cardDesc: {
-    fontSize: 11,
+    fontSize: 12,
     color: '#A08090',
-    lineHeight: 16,
-    flex: 1,
+    lineHeight: 17,
   },
-  cardFooter: {
+  cardArrowRow: {
     alignItems: 'flex-end',
-    marginTop: 8,
+    marginTop: 14,
+  },
+  cardArrowCircle: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   cardArrow: {
-    fontSize: 18,
+    fontSize: 15,
     fontWeight: '700',
   },
 
-  // ─────────── FOOTER ───────────
+  // ═══════════ FOOTER ═══════════
   footer: {
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10,
     paddingTop: 8,
   },
   footerLine: {
-    width: 40,
+    flex: 1,
     height: 1,
     backgroundColor: '#3D1830',
-    marginBottom: 14,
+    maxWidth: 80,
+  },
+  footerDot: {
+    width: 4,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: '#C8507A',
   },
   footerText: {
     fontSize: 11,
